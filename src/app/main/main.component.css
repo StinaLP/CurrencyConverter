@@ -1,0 +1,26 @@
+.container {
+  max-width: 1000px;
+}
+
+.shadow {
+  box-shadow: 5px 10px #888888;
+  border-radius: 10px;
+}
+
+.row {
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+.from-value {
+  font-weight: 600;
+}
+
+.final-result {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+#error-block {
+  color: red;
+}

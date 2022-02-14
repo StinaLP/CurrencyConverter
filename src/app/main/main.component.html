@@ -1,0 +1,86 @@
+<div class="container mt-5">
+  <form [formGroup]="currencyConverterForm">
+    <div class="p-5 border border-primary shadow">
+      <div class="row">
+        <div class="col-12 col-sm">
+          <label for="amount">Amount</label>
+          <input
+            class="form-control"
+            placeholder="Enter amount"
+            maxLength="9"
+            formControlName="amount"
+            id ="amount"
+            autocomplete="off"
+            [class.is-invalid]="currencyConverterForm.get('amount')?.invalid"/>
+          <span *ngIf="currencyConverterForm.get('amount')?.invalid" class="invalid-feedback">Please insert numbers only</span>
+        </div>
+        <div class="col-12 col-sm">
+          <label for="from-selector">From</label>
+          <select
+            #selectFrom
+            id="from-selector"
+            class="form-select"
+            [(ngModel)]="fromCurrency"
+            [ngModelOptions]="{ standalone: true }"
+            (change)="getRatesAndCalculate()">
+              <option *ngFor="let currency of currencyNames | keyvalue" [value]="currency.key">{{currency.key }}</option>
+          </select>
+        </div>
+        <div class="col-12 col-sm-1">
+          <label for=""></label>
+          <div>
+            <button class="btn" id="swap-button" (click)="swapCurrencies(selectFrom.value, selectTo.value)" data-toggle="tooltip" title="Swap currencies">
+              <i class="fa fa-exchange" style="font-size: 24px"></i>
+            </button>
+          </div>
+        </div>
+        <div class="co-l2 col-sm">
+          <label for="to-selector">To</label>
+          <select
+            #selectTo
+            id="to-selector"
+            class="form-select"
+            [(ngModel)]="toCurrency"
+            [ngModelOptions]="{ standalone: true }"
+            (change)="getRatesAndCalculate()">
+              <option *ngFor="let currency of currencyNames | keyvalue" [value]="currency.key">{{ currency.key }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="row mt-3">
+        <div
+          class="col"
+          id="answer-block"
+          *ngIf="currencyConverterForm.get('amount')?.valid && currencyConverterForm.get('amount')?.value != '' && currencyConverterForm.get('amount')?.value != null && APIKeyValid">
+          <div class="from-value">
+            {{amount | number: '1.2-2'}} {{fromCurrency}} =
+          </div>
+          <div class="final-result">
+            {{answer | number: '1.2-2'}} {{toCurrency}}
+          </div>
+        </div>
+        <div class="col" id="error-block" *ngIf="!APIKeyValid && currencyConverterForm.get('amount')?.valid">
+          <div class="from-value">
+            The API Key {{APIKey}} is either invalid or all requests have been used.
+          </div>
+        </div>
+      </div>
+      <div class="row mt-5 align-items-end">
+        <div class="col-12 col-sm-6">
+          <label for="api-key">Configure new API key:</label>
+        <input #APIKeyInput class="form-control" type="text" id="api-key" placeholder="Enter API key" autocomplete="off" maxlength="50" formControlName="key"/>
+      </div>
+      <div class="col-12 col-sm">
+        <button
+          id="configure-button"
+          class="btn btn-primary mt-3"
+          (click)="configureAPIKey(APIKeyInput.value)"
+          [disabled]="!currencyConverterForm.get('key')?.valid">
+          Configure
+        </button>
+      </div>
+      </div>
+    </div>
+  </form>
+</div>
+
