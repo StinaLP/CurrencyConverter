@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ConverterService } from '../converter.service';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 
 
@@ -21,6 +21,7 @@ export class MainComponent implements OnInit {
   amount: any;
   APIKey: string;
   APIKeyValid: boolean = true;
+  errorMessage: any;
 
   currencyConverterForm = new FormGroup({
     amount: new FormControl(null, [Validators.minLength(1), Validators.maxLength(9), Validators.pattern("^[0-9]*$")]),
@@ -30,14 +31,21 @@ export class MainComponent implements OnInit {
   constructor(private converter: ConverterService, private http: HttpClient) {  }
 
   ngOnInit(): void {
+    this. getCurrencies()
+    this.currencyConverterForm.valueChanges.subscribe(val=>{
+      this.amount = val.amount
+      this.getRatesAndCalculate()
+    })
+  }
+
+  getCurrencies() {
     this.converter.getListOfCurrencies().toPromise().then(data =>{
       this.currencyData.push(data);
       this.currencyNames = this.currencyData[0].results;
     })
-
-    this.currencyConverterForm.valueChanges.subscribe(val=>{
-      this.amount = val.amount
-      this.getRatesAndCalculate()
+    .catch((err: HttpErrorResponse) => {
+      this.APIKeyValid = false;
+      this.errorMessage = err.error[Object.keys(err.error)[1]];
     })
   }
 
@@ -48,8 +56,9 @@ export class MainComponent implements OnInit {
       this.APIKeyValid = true;
       this.calculateResult()
       })
-      .catch(() => {
+      .catch((err: HttpErrorResponse) => {
         this.APIKeyValid = false;
+        this.errorMessage = err.error[Object.keys(err.error)[1]];
       })
     }
   }
@@ -74,6 +83,7 @@ export class MainComponent implements OnInit {
       key: null
     });
     this.APIKeyValid = true;
+    this.getCurrencies()
   }
 }
 

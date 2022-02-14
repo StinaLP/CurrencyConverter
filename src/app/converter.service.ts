@@ -8,7 +8,7 @@ export class ConverterService {
 
   constructor(private http: HttpClient) {}
 
-  key: string = '3620cdff7c79b952a236';
+  key: string = '6d3ef3b536a69a0d409d';
 
   getRates(fromCurrency: string, toCurrency: string) {
     return this.http.get(`https://free.currconv.com/api/v7/convert?q=${toCurrency}_${fromCurrency},${fromCurrency}_${toCurrency}&compact=ultra&apiKey=${this.key}`)
