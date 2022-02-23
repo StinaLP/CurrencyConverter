@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ConverterService } from '../converter.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -18,10 +19,12 @@ export class MainComponent implements OnInit {
   toCurrency: string = 'USD';
   answer: number;
   rates: any;
-  amount: any;
+  amount: number;
   APIKey: string;
   APIKeyValid: boolean = true;
-  errorMessage: any;
+  errorMessage: string;
+  currencySubscription: Subscription;
+  ratesSubscription: Subscription;
 
   currencyConverterForm = new FormGroup({
     amount: new FormControl(null, [Validators.minLength(1), Validators.maxLength(9), Validators.pattern("^[0-9]*$")]),
@@ -31,34 +34,39 @@ export class MainComponent implements OnInit {
   constructor(private converter: ConverterService, private http: HttpClient) {  }
 
   ngOnInit(): void {
-    this. getCurrencies()
     this.currencyConverterForm.valueChanges.subscribe(val=>{
       this.amount = val.amount
       this.getRatesAndCalculate()
     })
-  }
 
-  getCurrencies() {
-    this.converter.getListOfCurrencies().toPromise().then(data =>{
-      this.currencyData.push(data);
-      this.currencyNames = this.currencyData[0].results;
+    this.currencySubscription = this.converter.getListOfCurrencies()
+    .subscribe({
+      next: data => {
+        this.currencyData.push(data);
+        this.currencyNames = this.currencyData[0].results;
+      },
+      error: error => {
+        this.APIKeyValid = false;
+        this.errorMessage = error.error.error;
+        throw error
+      }
     })
-    .catch((err: HttpErrorResponse) => {
-      this.APIKeyValid = false;
-      this.errorMessage = err.error[Object.keys(err.error)[1]];
-    })
+
   }
 
   getRatesAndCalculate() {
     if (this.currencyConverterForm.get('amount')?.valid) {
-      this.converter.getRates(this.fromCurrency, this.toCurrency).toPromise().then(rates =>{
-      this.rates= rates;
-      this.APIKeyValid = true;
-      this.calculateResult()
-      })
-      .catch((err: HttpErrorResponse) => {
-        this.APIKeyValid = false;
-        this.errorMessage = err.error[Object.keys(err.error)[1]];
+      this.ratesSubscription = this.converter.getRates(this.fromCurrency, this.toCurrency).subscribe({
+        next: data => {
+          this.rates= data;
+          this.APIKeyValid = true;
+          this.calculateResult()
+        },
+        error: error => {
+          this.APIKeyValid = false;
+          this.errorMessage = error.error.error;
+          throw error
+        }
       })
     }
   }
@@ -83,7 +91,11 @@ export class MainComponent implements OnInit {
       key: null
     });
     this.APIKeyValid = true;
-    this.getCurrencies()
+  }
+
+  ngOnDestroy() {
+    this.currencySubscription.unsubscribe();
+    this.ratesSubscription.unsubscribe();
   }
 }
 
