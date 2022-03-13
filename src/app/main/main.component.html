@@ -3,7 +3,7 @@
     <div class="p-5 border border-primary shadow">
       <div class="row" *ngIf="!APIKeyValid && currencyConverterForm.get('amount')?.valid">
         <div class="col" id="error-block" >
-          <div class="from-value">
+          <div class="alert alert-danger">
             {{errorMessage}}
            </div>
         </div>
@@ -18,8 +18,8 @@
             formControlName="amount"
             id ="amount"
             autocomplete="off"
-            [class.is-invalid]="currencyConverterForm.get('amount')?.invalid"/>
-          <span *ngIf="currencyConverterForm.get('amount')?.invalid" class="invalid-feedback">Please insert numbers only</span>
+            [class.is-invalid]="currencyConverterForm.get('amount')?.invalid && currencyConverterForm.get('amount')?.value != null  && currencyConverterForm.get('amount')?.value != ''"/>
+          <span *ngIf="currencyConverterForm.get('amount')?.invalid && currencyConverterForm.get('amount')?.value != null && currencyConverterForm.get('amount')?.value != ''" class="invalid-feedback">Please insert numbers only</span>
         </div>
         <div class="col-12 col-sm">
           <label for="from-selector">From</label>
